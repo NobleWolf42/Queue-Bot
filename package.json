@@ -1,0 +1,11 @@
+{
+  "name": "queue-bot",
+  "version": "1.0.0",
+  "description": "Simple Queue Bot for Discord",
+  "main": "bot.js",
+  "dependencies": {
+    "discord.io": "^2.5.3"
+  },
+  "author": "NobleWolf42",
+  "license": "MIT"
+}
