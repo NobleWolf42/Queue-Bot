@@ -53,8 +53,7 @@ function checkarray (chkvlu) {
 
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
-    bot.setPresence( {game: {name: "*help"}} ) 
-    console.log("1");
+    bot.setPresence( {game: {name: "*help"}} )
 })
 
 // Listens to Messages and executes various commands
