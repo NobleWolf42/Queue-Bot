@@ -1,6 +1,9 @@
 var Discord = require('discord.io');
+var fs = require("fs");
 var auth = require('./auth.json');
-var queue = ['Test'];
+//var qjson = require('./queue.json');
+var queue = require('./queue.json');
+var oldqueue = queue;
 var memberinfo = [];
 var roleids = [];
 
@@ -51,9 +54,21 @@ function checkarray (chkvlu) {
     }
 }
 
+function checkqueuesave () {
+    if (oldqueue != queue) {
+        fs.writeFile("queue.json", JSON.stringify(queue), function(err) {
+            if (err) {
+                console.log(err);
+            }
+        });
+        oldqueue = queue;
+    }
+}
+
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} )
+    setInterval(checkqueuesave(), 600000)
 })
 
 // Listens to Messages and executes various commands
