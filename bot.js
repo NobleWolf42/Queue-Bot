@@ -67,15 +67,20 @@ function checkqueuesave () {
 
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
-    bot.setPresence( {game: {name: "*help"}} )
-    setInterval(checkqueuesave(), 600000)
-})
+    bot.setPresence( {game: {name: "*help"}} );
+    setInterval(function(){ checkqueuesave()}, 600000);
+    
+    //Info code for minor Debugging
+    /*for (key in bot.servers['614167683247898684'].channels) {
+        console.log(bot.servers['614167683247898684'].channels[key]);
+    };*/
+});
 
 // Listens to Messages and executes various commands
 bot.on('message', function (user, userID, channelID, message, evt) {
 
     // The bot will listen for messages that will start with `*`
-    if (message.substring(0, 1) == '*') {
+    if (message.substring(0, 1) == '*' && channelID == '644274069163868200') {
         var args = message.substring(1).split(' ');
         var cmd = args[0];
        
