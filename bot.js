@@ -71,7 +71,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             
             // *join, adds the user who sent the message to an Array containing the Queue list
             case 'join':
-                console.log(String(user + "#" + bot.users[userID].discriminator));
                 if (queue.indexOf(String(user + "#" + bot.users[userID].discriminator)) === -1) {
                     queue.push(String(user + "#" + bot.users[userID].discriminator));
                     location = queue.indexOf(String(user + "#" + bot.users[userID].discriminator));
