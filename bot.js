@@ -171,6 +171,15 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     to:channelID,
                     message: '```*help - Displays All Commands\n*join - Adds you to the Queue to get into a ship\n*leave - Removes you from the Queue to get into a ship\n*queue - Displays the current Queue list\n*remove "USERNAME" - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n*clearqueue - Server Admin/Creators only command that clears the entire Queue list```'
                 })
+            break;
+
+            // *info, Lists all commands and what they do
+            case 'info':
+                bot.sendMessage({
+                    to:channelID,
+                    message: '```Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: NobleWolf42 and DK1```'
+                })
+            break;
          }
      }
 });
