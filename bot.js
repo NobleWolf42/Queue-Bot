@@ -17,7 +17,8 @@ var bot = new Discord.Client({
 function admincheck () {
 
     // Change this to the ID of your Server
-    serverinfo = bot.servers['644966355875135499'];
+    serverinfo = bot.servers['614167683247898684'];
+    serverinfotest = bot.servers['644966355875135499'];
 
     //This pulls the role information required to verify Admin
     memberinfo = serverinfo.members;
@@ -53,6 +54,7 @@ function checkarray (chkvlu) {
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} ) 
+    console.log("1");
 })
 
 // Listens to Messages and executes various commands
