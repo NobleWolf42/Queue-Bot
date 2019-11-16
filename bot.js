@@ -80,7 +80,7 @@ bot.on('ready', function(evt) {
 bot.on('message', function (user, userID, channelID, message, evt) {
 
     // The bot will listen for messages that will start with `*`
-    if (message.substring(0, 1) == '*' && channelID == '644274069163868200') {
+    if ((message.substring(0, 1) == '*' && channelID == '644274069163868200') || (message.substring(0, 1) == '*' && channelID == '643396405116796958')) {
         var args = message.substring(1).split(' ');
         var cmd = args[0];
        
