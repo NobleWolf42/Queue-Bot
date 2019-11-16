@@ -42,14 +42,20 @@ function admincheck () {
 //Function for checking roles
 function checkarray (chkvlu) {
     idlen = roleids.length;
+    idlen2 = chkvlu.length;
 
     for (i = 0; i < idlen; i++) {
+  
+        for (x = 0; x < idlen2; x++) {
 
-        if (roleids[i] === chkvlu[0]) {
-            return true;
-        }
-        if (i === idlen){
-            return false;
+            if (roleids[i] === chkvlu[x]) {
+                console.log("True");
+                return true;
+            }
+            if (i === idlen){
+                console.log("False");
+                return false;
+            }
         }
     }
 }
@@ -141,6 +147,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // *remove "USERNAME", Server Admin/Creator only command that removes the user specified from the Queue list
             case 'remove':
                 admincheck();
+                console.log(memberinfo[userID].roles);
 
                 if(checkarray(memberinfo[userID].roles)) {
 
