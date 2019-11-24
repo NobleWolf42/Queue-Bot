@@ -1,6 +1,6 @@
 var Discord = require('discord.io');
 var fs = require("fs");
-var auth = require('./auth.json');
+var CONFIG = require('./config.json');
 //var qjson = require('./queue.json');
 var queue = require('./queue.json');
 var oldqueue = queue;
@@ -12,7 +12,7 @@ var rolenames = ["Server Admin", "Creator"];
 
 // Initialize Discord Bot
 var bot = new Discord.Client({
-   token: auth.token,
+   token: CONFIG.AUTH.TOKEN,
    autorun: true
 });
 
@@ -20,7 +20,7 @@ var bot = new Discord.Client({
 function admincheck () {
 
     // Change this to the ID of your Server
-    serverinfo = bot.servers['614167683247898684'];
+    serverinfo = bot.servers[CONFIG.CONNECTION.SERVER_ID];
     //serverinfotest = bot.servers['644966355875135499'];
 
     //This pulls the role information required to verify Admin
@@ -71,6 +71,14 @@ function checkqueuesave () {
     }
 }
 
+// Checks the given channel ID to the allowed channel IDs in our config
+function isChannelAllowed (channelID) {
+    if(CONFIG.CONNECTION.ALLOWED_CHANNEL_IDS.indexOf(channelID) >= 0) { 
+        return true;
+    }
+    return false;
+}
+
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} );
@@ -86,9 +94,9 @@ bot.on('ready', function(evt) {
 bot.on('message', function (user, userID, channelID, message, evt) {
 
     // The bot will listen for messages that will start with `*`
-    if ((message.substring(0, 1) == '*' && channelID == '644274069163868200') || (message.substring(0, 1) == '*' && channelID == '643396405116796958')) {
+    if ((message.substring(0, 1) == '*' && isChannelAllowed(channelID))) {
         var args = message.substring(1).split(' ');
-        var cmd = args[0];
+        var cmd = args[0]; 
        
         args = args.splice(1);
         
