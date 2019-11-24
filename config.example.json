@@ -1,0 +1,12 @@
+{
+    "AUTH": {
+        "TOKEN": "YOUR_TOKEN"
+    },
+    "CONNECTION": {
+        "SERVER_ID": "YOUR_SERVER",
+        "ALLOWED_CHANNEL_IDS": [
+            "CHANNEL_ID_1",
+            "CHANNEL_ID_2"
+        ]
+    }
+}
