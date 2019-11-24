@@ -1,92 +1,148 @@
 var Discord = require('discord.io');
 var fs = require("fs");
-var auth = require('./auth.json');
-//var qjson = require('./queue.json');
-var queue = require('./queue.json');
-var oldqueue = queue;
-var memberinfo = [];
-var roleids = [];
-
-//List the Admin Roles Here
-var rolenames = ["Server Admin", "Creator"];
+var config = require('./config.json');
+var queue = [];
+var oldqueue = [];
+var member_info = [];
+var role_ids = [];
+var channel_ids = [];
 
 // Initialize Discord Bot
 var bot = new Discord.Client({
-   token: auth.token,
+   token: config.auth.token,
    autorun: true
 });
 
 //Include this function at the top of any admin olny commands
 function admincheck () {
+    //Memory Cleanup
+    role_ids = [];
 
-    // Change this to the ID of your Server
-    serverinfo = bot.servers['614167683247898684'];
-    //serverinfotest = bot.servers['644966355875135499'];
+    //Sets server_info to be all info for your server
+    server_info = bot.servers[config.connection.server_id];
 
     //This pulls the role information required to verify Admin
-    memberinfo = serverinfo.members;
-    role = serverinfo.roles;
+    member_info = server_info.members;
+    role = server_info.roles;
 
-    //Makes an arry of ids for selected roles
+    //Makes an array of ids for selected roles
     for (key in role) {
 
-        for (a in rolenames){
+        for (a in config.connection.admin_roles){
 
-            if (role[key].name === rolenames[a] || role[key].name === rolenames[a]) {
-                roleids.push(role[key].id);
+            if (role[key].name === config.connection.admin_roles[a]) {
+                role_ids.push(role[key].id);
             };
         };
     };
 };
 
 //Function for checking roles
-function checkarray (chkvlu) {
-    idlen = roleids.length;
-    idlen2 = chkvlu.length;
+function checkarray (user_roles) {
 
-    for (i = 0; i < idlen; i++) {
+    for (i = 0; i < role_ids.length; i++) {
   
-        for (x = 0; x < idlen2; x++) {
+        for (x = 0; x < user_roles.length; x++) {
 
-            if (roleids[i] === chkvlu[x]) {
-                console.log("True");
+            if (role_ids[i] === user_roles[x]) {
                 return true;
-            }
-            if (i === idlen){
-                console.log("False");
-                return false;
             }
         }
     }
+    return false;
 }
 
-function checkqueuesave () {
+//Function that checks to see if changes have been made to the queue, and if they have, saves them to a file
+function saveQueue () {
+
+    queueOutput = [];
+
     if (oldqueue != queue) {
-        fs.writeFile("queue.json", JSON.stringify(queue), function(err) {
+        
+        for (i = 0; i < queue.length; i++) {
+            queueOutput.push({
+                "Name": queue[i].Name,
+                "Message": queue[i].Message
+            });
+        }
+
+        fs.writeFile("savedQueue.json", JSON.stringify(queueOutput), function(err) {
             if (err) {
                 console.log(err);
             }
         });
+
         oldqueue = queue;
     }
+}
+
+//Loads a saved queue from file, if one exists
+function loadQueue () {
+    
+    if (fs.existsSync("./savedQueue.json")) {
+
+        fs.readFile("./savedQueue.json", function (err, data) {
+            if (err) {
+                console.log(err);
+            }
+
+            var queueInput = JSON.parse(data);
+
+            for (i = 0; i < queueInput.length; i++) {
+                queue.push(new User (queueInput[i].Name, queueInput[i].Message));
+            }
+        });
+    }
+}
+
+// Checks the given channel ID to the allowed channel IDs in our config
+function isChannelAllowed (channelID) {
+    
+    //Memory Cleanup
+    role_ids = [];
+
+    //Sets server_info to be all info for your server
+    server_info = bot.servers[config.connection.server_id];
+
+    //This pulls the channel information required to verify Admin
+    channels_info = server_info.channels;
+
+    //Makes an array of ids for selected channels
+    for (key in channels_info) {
+
+        for (a in config.connection.allowed_channels){
+
+            if (channels_info[key].name === config.connection.allowed_channels[a]) {
+                channel_ids.push(channels_info[key].id);
+            };
+        };
+    };
+   
+    //Returns True if the channel posted in is one of the channels in config.connection.allowed_chanels
+    if(channel_ids.indexOf(channelID) != -1) { 
+        return true;
+    }
+
+    return false;
 }
 
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} );
-    setInterval(checkqueuesave, 300000);
-    
+    loadQueue;
+    setInterval(saveQueue, 600000);
+
     //Info code for minor Debugging
-    /*for (key in bot.servers['614167683247898684'].channels) {
-        console.log(bot.servers['614167683247898684'].channels[key]);
+    /*for (key in bot.servers[config.connection.server_id].channels) {
+        console.log(bot.servers[config.connection.server_id].channels[key]);
     };*/
 });
 
 // Listens to Messages and executes various commands
 bot.on('message', function (user, userID, channelID, message, evt) {
 
-    // The bot will listen for messages that will start with `*`
-    if ((message.substring(0, 1) == '*' && channelID == '644274069163868200') || (message.substring(0, 1) == '*' && channelID == '643396405116796958')) {
+    // The bot will listen for messages that will start with `*`, in the channels in config.connection.allowed_channels
+    if ((message.substring(0, 1) == '*' && isChannelAllowed(channelID))) {
         var args = message.substring(1).split(', ');
         var cmd = args[0];
        
@@ -102,14 +158,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     location = queue.indexOf(String(user + "#" + bot.users[userID].discriminator));
                     bot.sendMessage({
                         to: channelID,
-                        message: `You are at position ${location} in the queue!`
+                        message: `You are at position ${location + 1} in the queue!`
                     });
                 }
                 else {
                     location = queue.indexOf(String(user + "#" + bot.users[userID].discriminator));
                     bot.sendMessage({
                         to: channelID,
-                        message: `You are already at position ${location} in the queue!`
+                        message: `You are already at position ${location + 1} in the queue!`
                     });
                 }
             break;
@@ -129,8 +185,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 msgtxt = "";
                 arrlen = queue.length;
 
-                for (i = 1; i < arrlen; i++) {
-                    arrtext += i + ' - ' + queue[i] + "\n";
+                for (i = 0; i < arrlen; i++) {
+                    arrtext += (i + 1) + ' - ' + queue[i] + "\n";
                 }
 
                 if (arrtext === ""){
@@ -147,9 +203,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // *remove, "USERNAME", Server Admin/Creator only command that removes the user specified from the Queue list
             case 'remove':
                 admincheck();
-                console.log(memberinfo[userID].roles);
 
-                if(checkarray(memberinfo[userID].roles)) {
+                if(checkarray(member_info[userID].roles)) {
 
                     if (queue.indexOf(String(args)) == -1) {
                         bot.sendMessage({
@@ -177,7 +232,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'clearqueue':
                 admincheck();
                 
-                if(checkarray(memberinfo[userID].roles)) {
+                if(checkarray(member_info[userID].roles)) {
                     queue = ['Test'];
                     bot.sendMessage({
                         to: channelID,
