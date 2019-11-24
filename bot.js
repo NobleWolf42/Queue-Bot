@@ -3,9 +3,11 @@ var fs = require("fs");
 var CONFIG = require('./config.json');
 //var qjson = require('./queue.json');
 var queue = require('./queue.json');
-var oldqueue = queue;
+var User = require('./user.js');
+var oldqueue = queue; 
 var memberinfo = [];
 var roleids = [];
+
 
 //List the Admin Roles Here
 var rolenames = ["Server Admin", "Creator"];
@@ -79,6 +81,16 @@ function isChannelAllowed (channelID) {
     return false;
 }
 
+// Get index in queue from user id
+function getQueueIndexFromUserName (userName) {
+    for (i = 0; i < queue.length; i++) {
+        if (queue[i].Name === userName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} );
@@ -99,22 +111,23 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         var cmd = args[0]; 
        
         args = args.splice(1);
+        var userName = String(user + "#" + bot.users[userID].discriminator);
         
         // All commands go here
         switch(cmd) {
             
             // *join, adds the user who sent the message to an Array containing the Queue list
             case 'join':
-                if (queue.indexOf(String(user + "#" + bot.users[userID].discriminator)) === -1) {
-                    queue.push(String(user + "#" + bot.users[userID].discriminator));
-                    location = queue.indexOf(String(user + "#" + bot.users[userID].discriminator));
+                if (getQueueIndexFromUserName(userName) === -1) {
+                    queue.push(new User(userName, message.replace("*join", "").trim()));
+                    location = getQueueIndexFromUserName(userName);
                     bot.sendMessage({
                         to: channelID,
                         message: `You are at position ${location} in the queue!`
                     });
                 }
                 else {
-                    location = queue.indexOf(String(user + "#" + bot.users[userID].discriminator));
+                    location = getQueueIndexFromUserName(userName);
                     bot.sendMessage({
                         to: channelID,
                         message: `You are already at position ${location} in the queue!`
@@ -124,7 +137,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
             // *leave, removes the user who sent the message from the Queue list
             case 'leave':
-                queue.splice(queue.indexOf(String(user + "#" + bot.users[userID].discriminator)), 1);
+                queue.splice(getQueueIndexFromUserName(userName), 1);
                 bot.sendMessage({
                     to: channelID,
                     message: 'You have left the queue!'
@@ -138,7 +151,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 arrlen = queue.length;
 
                 for (i = 1; i < arrlen; i++) {
-                    arrtext += i + ' - ' + queue[i] + "\n";
+                    arrtext += i + ' - ' + queue[i].DisplayName() + "\n";
                 }
 
                 if (arrtext === ""){
@@ -156,17 +169,18 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'remove':
                 admincheck();
                 console.log(memberinfo[userID].roles);
+                console.log(args);
 
                 if(checkarray(memberinfo[userID].roles)) {
 
-                    if (queue.indexOf(String(args)) == -1) {
+                    if (getQueueIndexFromUserName(args[0]) === -1) {
                         bot.sendMessage({
                             to: channelID,
                             message: `You did not specify a valid user.`
                         });
                     }
                     else {
-                        queue.splice(queue.indexOf(String(args)), 1);
+                        queue.splice(getQueueIndexFromUserName(args[0]), 1);
                         bot.sendMessage({
                             to: channelID,
                             message: `Removed ${args} from Queue.`
@@ -186,7 +200,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 admincheck();
                 
                 if(checkarray(memberinfo[userID].roles)) {
-                    queue = ['Test'];
+                    queue = [];
                     bot.sendMessage({
                         to: channelID,
                         message: `Cleared Queue.`
@@ -204,7 +218,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'help':
                 bot.sendMessage({
                     to:channelID,
-                    message: '```*help - Displays All Commands\n*join - Adds you to the Queue to get into a ship\n*leave - Removes you from the Queue to get into a ship\n*queue - Displays the current Queue list\n*remove "USERNAME" - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n*clearqueue - Server Admin/Creators only command that clears the entire Queue list```'
+                    message: '```*help - Displays All Commands\n*join "MESSAGE" - Adds you to the Queue to get into a ship with an optional message next to your name\n*leave - Removes you from the Queue to get into a ship\n*queue - Displays the current Queue list\n*remove "USERNAME" - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n*clearqueue - Server Admin/Creators only command that clears the entire Queue list```'
                 })
             break;
 
