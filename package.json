@@ -1,8 +1,11 @@
 {
-    "name": "queue-bot",
-    "version": "1.0.0",
-    "description": "Basic bot for Maintaining a queue",
-    "main": "bot.js",
-    "author": "NobleWolf42 and DK1",
-    "dependencies": {}
-    }
+  "name": "queue-bot",
+  "version": "1.0.0",
+  "description": "Basic bot for Maintaining a queue",
+  "main": "bot.js",
+  "author": "NobleWolf42 and DK1",
+  "dependencies": {
+    "discord.io": "^2.5.3",
+    "winston": "^3.2.1"
+  }
+}
