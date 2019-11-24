@@ -74,7 +74,7 @@ function checkqueuesave () {
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} );
-    setInterval(function(){ checkqueuesave()}, 600000);
+    setInterval(checkqueuesave, 300000);
     
     //Info code for minor Debugging
     /*for (key in bot.servers['614167683247898684'].channels) {
@@ -87,7 +87,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
     // The bot will listen for messages that will start with `*`
     if ((message.substring(0, 1) == '*' && channelID == '644274069163868200') || (message.substring(0, 1) == '*' && channelID == '643396405116796958')) {
-        var args = message.substring(1).split(' ');
+        var args = message.substring(1).split(', ');
         var cmd = args[0];
        
         args = args.splice(1);
@@ -144,7 +144,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
             break;
 
-            // *remove "USERNAME", Server Admin/Creator only command that removes the user specified from the Queue list
+            // *remove, "USERNAME", Server Admin/Creator only command that removes the user specified from the Queue list
             case 'remove':
                 admincheck();
                 console.log(memberinfo[userID].roles);
@@ -196,7 +196,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'help':
                 bot.sendMessage({
                     to:channelID,
-                    message: '```*help - Displays All Commands\n*join - Adds you to the Queue to get into a ship\n*leave - Removes you from the Queue to get into a ship\n*queue - Displays the current Queue list\n*remove "USERNAME" - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n*clearqueue - Server Admin/Creators only command that clears the entire Queue list```'
+                    message: '```*help - Displays All Commands\n*join - Adds you to the Queue to get into a ship\n*leave - Removes you from the Queue to get into a ship\n*queue - Displays the current Queue list\n*remove, USERNAME - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n*clearqueue - Server Admin/Creators only command that clears the entire Queue list\n*info - Information about the bot and its creators.```'
                 })
             break;
 
