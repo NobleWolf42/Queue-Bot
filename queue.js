@@ -259,7 +259,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'info':
                 bot.sendMessage({
                     to:channelID,
-                    message: '```Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: NobleWolf42 and DK1```'
+                    message: '```Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: NobleWolf42 and DK1\nIf you would like to assist with the bot, you can find us on Discord at https://discord.gg/tgJtK7f, and on GitHub at https://github.com/NobleWolf42/Queue-Bot/.```'
                 })
             break;
          }
