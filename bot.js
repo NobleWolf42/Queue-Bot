@@ -2,9 +2,8 @@ var Discord = require('discord.io');
 var fs = require("fs");
 var CONFIG = require('./config.json');
 //var qjson = require('./queue.json');
-var queue = require('./queue.json');
+var queue = [];
 var User = require('./user.js');
-var oldqueue = queue; 
 var memberinfo = [];
 var roleids = [];
 
@@ -62,14 +61,45 @@ function checkarray (chkvlu) {
     }
 }
 
-function checkqueuesave () {
-    if (oldqueue != queue) {
-        fs.writeFile("queue.json", JSON.stringify(queue), function(err) {
+function saveQueue () {
+
+    console.log("Saving queue...");
+
+    var queueOutput = [];
+
+    for (i = 0; i < queue.length; i++) {
+        queueOutput.push({
+            "Name": queue[i].Name,
+            "Message": queue[i].Message
+        });
+    }
+
+    fs.writeFile("savedQueue.json", JSON.stringify(queueOutput), function(err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+
+    console.log("Done saving!");
+}
+
+function loadQueue () {
+    if (fs.existsSync("./savedQueue.json")) {
+        console.log("Loading queue...");
+
+        fs.readFile("./savedQueue.json", function (err, data) {
             if (err) {
                 console.log(err);
             }
+
+            var queueInput = JSON.parse(data);
+
+            for (i = 0; i < queueInput.length; i++) {
+                queue.push(new User (queueInput[i].Name, queueInput[i].Message));
+            }
         });
-        oldqueue = queue;
+
+        console.log("Done loading queue!");
     }
 }
 
@@ -94,7 +124,9 @@ function getQueueIndexFromUserName (userName) {
 // Sets the Status Message of the bot (i.e. when a user is "Playing Sea Of Thieves")
 bot.on('ready', function(evt) {
     bot.setPresence( {game: {name: "*help"}} );
-    setInterval(function(){ checkqueuesave()}, 600000);
+    loadQueue();
+
+    setInterval(function(){ saveQueue()}, 60000);
     
     //Info code for minor Debugging
     /*for (key in bot.servers['614167683247898684'].channels) {
@@ -123,14 +155,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     location = getQueueIndexFromUserName(userName);
                     bot.sendMessage({
                         to: channelID,
-                        message: `You are at position ${location} in the queue!`
+                        message: `You are at position ${location + 1} in the queue!`
                     });
                 }
                 else {
                     location = getQueueIndexFromUserName(userName);
                     bot.sendMessage({
                         to: channelID,
-                        message: `You are already at position ${location} in the queue!`
+                        message: `You are already at position ${location + 1} in the queue!`
                     });
                 }
             break;
@@ -150,8 +182,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 msgtxt = "";
                 arrlen = queue.length;
 
-                for (i = 1; i < arrlen; i++) {
-                    arrtext += i + ' - ' + queue[i].DisplayName() + "\n";
+                for (i = 0; i < arrlen; i++) {
+                    arrtext += (i + 1) + ' - ' + queue[i].DisplayName() + "\n";
                 }
 
                 if (arrtext === ""){
