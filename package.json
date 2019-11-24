@@ -4,5 +4,8 @@
     "description": "Basic bot for Maintaining a queue",
     "main": "bot.js",
     "author": "NobleWolf42 and DK1",
-    "dependencies": {}
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "winston": "^3.2.1"
     }
+}
