@@ -210,7 +210,7 @@ client.on("message", message => {
 
         // help, Lists all commands and what they do
         if (userInput == (config.general.botPrefix + 'help')){
-            var rply = '```' + config.general.botPrefix + 'help - Displays All Commands\n' + config.general.botPrefix + 'join - Adds you to the Queue to get into a ship\n' + config.general.botPrefix + 'leave - Removes you from the Queue to get into a ship\n' + config.general.botPrefix + 'position - Displays your current position in the Queue list\n' + config.general.botPrefix + 'queue - Displays the current Queue list\n' + config.general.botPrefix + 'remove, USERNAME - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n' + config.general.botPrefix + 'clearqueue - Server Admin/Creators only command that clears the entire Queue list\n' + config.general.botPrefix + 'info - Information about the bot and its creators.```';
+            var rply = '```' + config.general.botPrefix + 'help - Displays All Commands\n' + config.general.botPrefix + 'join - Adds you to the Queue to get into a ship\n' + config.general.botPrefix + 'leave - Removes you from the Queue to get into a ship\n' + config.general.botPrefix + 'position - Displays your current position in the Queue list\n' + config.general.botPrefix + 'queue - Displays the current Queue list\n' + config.general.botPrefix + 'remove @USER - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n' + config.general.botPrefix + 'clearqueue - Server Admin/Creators only command that clears the entire Queue list\n' + config.general.botPrefix + 'info - Information about the bot and its creators.```';
             message.channel.send(rply);
         };
 
