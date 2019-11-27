@@ -1,7 +1,9 @@
 # Queue-Bot
 Basic Queue Bot for Discord
 
-If you would like to halp in the development of this bot, the discord is https://discord.gg/tgJtK7f.
+!!Needs To be rewritten in disscord.js
+
+If you would like to help in the development of this bot, the discord is https://discord.gg/tgJtK7f.
 
 Uses discord.js
 
