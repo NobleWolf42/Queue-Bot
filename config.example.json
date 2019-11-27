@@ -2,15 +2,19 @@
     "auth": {
         "token": "YOUR BOT TOKEN"
     },
-    "connection": {
-        "server_id": "YOUR SERVER ID",
-        "admin_roles": [
+    "general": {
+        "botPrefix": "*",
+        "adminRoles": [
             "Server Admin",
-            "Example Role"
+            "Example Role 1"
         ],
-        "allowed_channels": [
-            "General",
-            "Example-Chat-1"
+        "modRoles": [
+            "Moderators",
+            "Example Role 2"
+        ],
+        "allowedChannels": [
+            "Example-Chat-1",
+            "General"
         ]
     }
 }
