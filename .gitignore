@@ -1,0 +1,6 @@
+# Known ignores for node projects
+node_modules/
+
+# Our custom secret files
+config.json
+savedQueue.json
