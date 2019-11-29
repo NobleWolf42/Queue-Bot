@@ -26,7 +26,7 @@ function saveQueue () {
     queueOutput = [];
 
     if (oldqueue != queue) {
-        
+
         for (i = 0; i < queue.length; i++) {
             queueOutput.push(queue[i]);
         }
@@ -43,7 +43,7 @@ function saveQueue () {
 
 //Loads a saved queue from file, if one exists
 function loadQueue () {
-    
+
     if (fs.existsSync("./savedQueue.json")) {
 
         fs.readFile("./savedQueue.json", function (err, data) {
@@ -62,7 +62,7 @@ function loadQueue () {
 
 //Function that calls the server roles
 function serverRoleUpdate(sRole) {
-    
+
     //Memory Cleanup
     adminRoleIDs = [];
     modRoleIDs = [];
@@ -78,7 +78,7 @@ function serverRoleUpdate(sRole) {
 
     //Loops throught the Admin Role Names, pusing them to an array
     for (key in config.general.adminRoles) {
-        
+
         //Pushes role IDs to Admin if they Match config.general.adminRoles
         if (basicServerRoles[config.general.adminRoles[key]]){
             adminRoleIDs.push(basicServerRoles[config.general.adminRoles[key]]);
@@ -87,7 +87,7 @@ function serverRoleUpdate(sRole) {
 
     //Loops throught the Mod Role Names, pusing them to an array
     for (key in config.general.modRoles) {
-        
+
         //Pushes role IDs to Mods if they Match config.general.modRoles
         if (basicServerRoles[config.general.modRoles[key]]){
             modRoleIDs.push(basicServerRoles[config.general.modRoles[key]]);
@@ -97,13 +97,13 @@ function serverRoleUpdate(sRole) {
 
 //Function that returns boolean for if the user who sent the message is an Admin (based off config.connection.adminRoles)
 function adminCheck(userRolesArray, serverRolesArray) {
-    
+
     //Calls a function that updates the server role information
     serverRoleUpdate(serverRolesArray);
-    
+
     //Checks to see if any of the user role ids match any of the admin role ids
     for (key in userRolesArray) {
-        
+
         for (a in adminRoleIDs) {
 
             if (userRolesArray[key] == adminRoleIDs [a]) {
@@ -118,13 +118,13 @@ function adminCheck(userRolesArray, serverRolesArray) {
 
 //Function that returns boolean for if the user who sent the message is a Moderator (based off config.connection.modRoles)
 function modCheck(userRolesArray, serverRolesArray) {
-    
+
     //Calls a function that updates the server role information
     serverRoleUpdate(serverRolesArray);
-    
+
     //Checks to see if user role ids match any of the mod role ids
     for (key in userRolesArray) {
-        
+
         for (a in modRoleIDs) {
 
             if (userRolesArray[key] == modRoleIDs [a]) {
@@ -137,6 +137,19 @@ function modCheck(userRolesArray, serverRolesArray) {
     return false;
 }
 
+// Removes given usertag from the queue
+// Returns true if it removed a user, false if there's no user in the queue with that tag
+function removeUser(userTag) {
+    var userIndex = queue.indexOf(userTag);
+
+    if(userIndex != -1) {
+        queue.splice(userIndex, 1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 //Logs the Bot info when bot starts
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -147,7 +160,7 @@ client.on("ready", () => {
 
 //Handels Messages and their responses
 client.on("message", message => {
-    
+
     if (config.general.allowedChannels.indexOf(message.channel.name) != -1) {
 
         //Varibles for the message info needed
@@ -159,7 +172,7 @@ client.on("message", message => {
 
         // join, adds the user who sent the message to an Array containing the Queue list
         if (userInput == (config.general.botPrefix + 'join')){
-        
+
             location = queue.indexOf(String(message.member.user.tag));
 
             if (location === -1){
@@ -204,7 +217,7 @@ client.on("message", message => {
             }
 
             msgtxt = '```' + arrtext + '```';
-        
+
             message.channel.send(msgtxt);
         };
 
@@ -234,8 +247,34 @@ client.on("message", message => {
         // remove @USER, Server Admin/Creator only command that removes the user specified from the Queue list
         if (userInput.slice(0,7) == (config.general.botPrefix + 'remove')){
             if (adminTF == true){
-                queue.splice(queue.indexOf(String(message.mentions.users.first().tag)), 1);
-                message.reply(`Removed ${message.mentions.users.first().tag} from Queue.`);
+                var userTag = message.mentions.users.first();
+
+                // Makes both @USER and just the usertag(user#0000) viable input to remove someone from the queue
+                if(!userTag) {
+                    userTag = message.content.replace(`${config.general.botPrefix}remove`, "").trim();
+
+                    // Uppercase the first letter incase the admin forgets
+                    userTag = userTag.charAt(0).toUpperCase() + userTag.slice(1);
+
+                    // Get the user from the server so we can use the id to tag the user
+                    message.guild.fetchMembers(userTag, 1)
+                        .then((data) => {
+                            var userId = data.members.first().id;
+
+                            if(removeUser(userTag)) {
+                                message.reply(`Removed <@${userId}> from Queue.`);
+                            } else {
+                                message.reply(`No user with that name exists in the queue.`);
+                            }
+                        })
+                        .catch((err) => console.log(err));
+                } else {
+                    if(removeUser(userTag.tag)) {
+                        message.reply(`Removed ${userTag} from Queue.`);
+                    } else {
+                        message.reply(`No user with that name exists in the queue.`);
+                    }
+                }
             }
             else {
                 message.channel.send("You do not have permission to use this command.");
