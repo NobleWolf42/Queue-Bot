@@ -201,8 +201,6 @@ client.on("message", message => {
         // leave, removes the user who sent the message from the Queue list
         if (command == (config.general.botPrefix + 'leave')){
             
-            console.log(String(message.member.user.tag));
-            console.log(queue.indexOf(String(message.member.user.tag)));
             if (queue.indexOf(String(message.member.user.tag)) != -1) {
                 queue.splice(queue.indexOf(String(message.member.user.tag)), 1);
                 message.reply("You have left the queue.");
