@@ -1,3 +1,5 @@
+// #region Dependancy
+
 var Discord = require('discord.js');
 var fs = require("fs");
 var config = require('./config.json');
@@ -5,6 +7,10 @@ var adminRoleIDs = [];
 var modRoleIDs = [];
 var queue = [];
 var oldqueue = [];
+
+//#endregion
+
+//#region Initalize Bot
 
 // Initialize Discord Bot
 var client = new Discord.Client();
@@ -19,6 +25,10 @@ client.login(config.auth.token);
 
 //Logs Errors
 client.on('error', console.error);
+
+//#endregion
+
+//#region save/load queue functions
 
 //Function that checks to see if changes have been made to the queue, and if they have, saves them to a file
 function saveQueue () {
@@ -59,6 +69,10 @@ function loadQueue () {
         });
     }
 }
+
+//#endregion
+
+//#region admin /mod check functions
 
 //Function that calls the server roles
 function serverRoleUpdate(sRole) {
@@ -137,6 +151,10 @@ function modCheck(userRolesArray, serverRolesArray) {
     return false;
 }
 
+//#endregion
+
+//#region Start  Bot
+
 //Logs the Bot info when bot starts
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -145,20 +163,26 @@ client.on("ready", () => {
     setInterval(saveQueue, 600000);
 });
 
+//#endregion
+
+//#region message Handeling
+
 //Handels Messages and their responses
 client.on("message", message => {
     
     if (config.general.allowedChannels.indexOf(message.channel.name) != -1) {
 
         //Varibles for the message info needed
-        var userInput = message.content.toLowerCase();
+        var userInput = message.content.toLowerCase().split(' ');
+        var command = userInput[0];
         var userRoles = message.author.lastMessage.member._roles;
         var serverRoles = message.channel.guild.roles;
         var adminTF = adminCheck(userRoles, serverRoles);
         var modTF = modCheck(userRoles, serverRoles);
 
+        //#region Join
         // join, adds the user who sent the message to an Array containing the Queue list
-        if (userInput == (config.general.botPrefix + 'join')){
+        if (command == (config.general.botPrefix + 'join')){
         
             location = queue.indexOf(String(message.member.user.tag));
 
@@ -171,15 +195,27 @@ client.on("message", message => {
                 message.reply(`You are already at position ${location + 1} in the queue!`);
             }
         };
+        //#endregion
 
+        //#region Leave
         // leave, removes the user who sent the message from the Queue list
-        if (userInput == (config.general.botPrefix + 'leave')){
-            queue.splice(String(message.member.user.tag), 1);
-            message.reply("You have left the queue.");
+        if (command == (config.general.botPrefix + 'leave')){
+            
+            console.log(String(message.member.user.tag));
+            console.log(queue.indexOf(String(message.member.user.tag)));
+            if (queue.indexOf(String(message.member.user.tag)) != -1) {
+                queue.splice(queue.indexOf(String(message.member.user.tag)), 1);
+                message.reply("You have left the queue.");
+            }
+            else {
+                message.reply("You were not in the queue.");
+            }
         };
+        //#endregion
 
+        //#region Position
         // position, returns the current queue position for the user who sent the message from the Queue list
-        if (userInput == (config.general.botPrefix + 'position')){
+        if (command == (config.general.botPrefix + 'position')){
             location = queue.indexOf(String(message.member.user.tag));
 
             if (location === -1){
@@ -189,9 +225,11 @@ client.on("message", message => {
                 message.reply(`You are at position ${location + 1} in the queue!`);
             }
         };
+        //#endregion
 
+        //#region Queue
         // queue, displays the current Queue list
-        if (userInput == (config.general.botPrefix + 'queue')){
+        if (command == (config.general.botPrefix + 'queue')){
             arrtext = "";
             msgtxt = "";
 
@@ -207,21 +245,28 @@ client.on("message", message => {
         
             message.channel.send(msgtxt);
         };
+        //#endregion
 
+        //#region Help
         // help, Lists all commands and what they do
-        if (userInput == (config.general.botPrefix + 'help')){
+        if (command == (config.general.botPrefix + 'help')){
             var rply = '```' + config.general.botPrefix + 'help - Displays All Commands\n' + config.general.botPrefix + 'join - Adds you to the Queue to get into a ship\n' + config.general.botPrefix + 'leave - Removes you from the Queue to get into a ship\n' + config.general.botPrefix + 'position - Displays your current position in the Queue list\n' + config.general.botPrefix + 'queue - Displays the current Queue list\n' + config.general.botPrefix + 'remove @USER - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n' + config.general.botPrefix + 'clearqueue - Server Admin/Creators only command that clears the entire Queue list\n' + config.general.botPrefix + 'info - Information about the bot and its creators.```';
             message.channel.send(rply);
         };
+        //#endregion
 
+        //#region Info
         // info, returns info message
-        if (userInput == (config.general.botPrefix + 'info')){
+        if (command == (config.general.botPrefix + 'info')){
             message.channel.send('```Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: NobleWolf42 and DK1\nIf you would like to assist with the bot, you can find us on Discord at https://discord.gg/tgJtK7f, and on GitHub at https://github.com/NobleWolf42/Queue-Bot/.```');
         };
+        //#endregion
 
-        //ADMIN ONLY COMMANDS
+        //#region ADMIN ONLY COMMANDS
+        
+        //#region ClearQueue
         // clearqueue, Server Admin/Creator only command that clears the entire Queue list
-        if ((adminTF == true) && (userInput == (config.general.botPrefix + 'clearqueue'))){
+        if ((adminTF == true) && (command == (config.general.botPrefix + 'clearqueue'))){
             if (adminTF == true){
                 queue = [];
                 message.reply("Cleared Queue");
@@ -230,16 +275,27 @@ client.on("message", message => {
                 message.channel.send("You do not have permission to use this command.");
             }
         };
+        //#endregion
 
+        //#region Remove
         // remove @USER, Server Admin/Creator only command that removes the user specified from the Queue list
-        if (userInput.slice(0,7) == (config.general.botPrefix + 'remove')){
+        if (command == (config.general.botPrefix + 'remove')){
             if (adminTF == true){
-                queue.splice(queue.indexOf(String(message.mentions.users.first().tag)), 1);
-                message.reply(`Removed ${message.mentions.users.first().tag} from Queue.`);
+                if(message.mentions.users.first() !== undefined) {
+                    queue.splice(queue.indexOf(String(message.mentions.users.first().tag)), 1);
+                    message.reply(`Removed ${message.mentions.users.first().tag} from Queue.`);
+                }
+                else {
+                    message.reply("You did not @ a user.");
+                }
             }
             else {
-                message.channel.send("You do not have permission to use this command.");
+                message.reply("You do not have permission to use this command.");
             }
         };
+        //#endregion
+        //#endregion
     };
 });
+
+//#endregion
