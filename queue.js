@@ -182,21 +182,62 @@ client.on("ready", () => {
 
 //#endregion
 
+//#region Voice Channel Join
+//This is the code that makes it so that join the specified voice channel adds you to the queue and leaving it removes you from the queue
+client.on('voiceStateUpdate', (oldState, newState) => {  
+
+    location = queue.indexOf(String(newState.member.user.tag));
+
+    if ((newState.channel != null)) {
+        if ((newState.channel.name == config.general.queueVoiceChannel) && (newState.channelID != oldState.channelID)) {
+            if (location === -1) {
+                queue.push(String(newState.member.user.tag));
+                location = queue.indexOf(String(newState.member.user.tag));
+                client.users.cache.get(newState.id).send(`You have joined at position ${location + 1} in the queue!`);
+            }
+            else {
+                client.users.cache.get(newState.id).send(`You are already at position ${location + 1} in the queue!`);
+            }
+        }
+        else if (oldState.channel != null) {
+            if ((oldState.channel.name == config.general.queueVoiceChannel) && (newState.channel.name != config.general.queueVoiceChannel)) {    
+                leaveQueue();
+            }
+        }
+    }
+    else if (oldState.channel != null) {
+        if ((oldState.channel.name == config.general.queueVoiceChannel) && (newState.channel== null)) {
+            leaveQueue();
+        }
+    }
+
+    function leaveQueue () {
+        if (queue.indexOf(String(newState.member.user.tag)) != -1) {
+            queue.splice(queue.indexOf(String(newState.member.user.tag)), 1);
+            client.users.cache.get(newState.id).send("You have left the queue.");
+        }
+        else {
+            client.users.cache.get(newState.id).send("You were not in the queue.");
+        }
+    }
+});
+//#endregion
+
 //#region message Handeling
 
 //Handels Messages and their responses
 client.on("message", message => {
-    
+
     if (config.general.allowedChannels.indexOf(message.channel.name) != -1) {
 
         //Varibles for the message info needed
         var userInput = message.content.toLowerCase().split(' ');
         var command = userInput[0];
         var userRoles = message.author.lastMessage.member._roles;
-        var serverRoles = message.channel.guild.roles;
+        var serverRoles = message.guild.roles.cache;
         var adminTF = adminCheck(userRoles, serverRoles);
         var modTF = modCheck(userRoles, serverRoles);
-
+        
         //#region Join
         // join, adds the user who sent the message to an Array containing the Queue list
         if (command == (config.general.botPrefix + 'join')){
@@ -211,6 +252,8 @@ client.on("message", message => {
             else {
                 message.reply(`You are already at position ${location + 1} in the queue!`);
             }
+
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -224,6 +267,7 @@ client.on("message", message => {
             else {
                 message.reply("You were not in the queue.");
             }
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -238,6 +282,7 @@ client.on("message", message => {
             else {
                 message.reply(`You are at position ${location + 1} in the queue!`);
             }
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -258,6 +303,7 @@ client.on("message", message => {
             msgtxt = '```' + arrtext + '```';
         
             message.channel.send(msgtxt);
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -266,13 +312,19 @@ client.on("message", message => {
         if (command == (config.general.botPrefix + 'help')){
             var rply = '```' + config.general.botPrefix + 'help - Displays All Commands\n' + config.general.botPrefix + 'join - Adds you to the Queue to get into a ship\n' + config.general.botPrefix + 'leave - Removes you from the Queue to get into a ship\n' + config.general.botPrefix + 'position - Displays your current position in the Queue list\n' + config.general.botPrefix + 'queue - Displays the current Queue list\n' + config.general.botPrefix + 'remove @USER - Server Admin/Creators only caommnad that removes the specified user from the Queue List\n' + config.general.botPrefix + 'clearqueue - Server Admin/Creators only command that clears the entire Queue list\n' + config.general.botPrefix + 'info - Information about the bot and its creators.```';
             message.channel.send(rply);
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
         //#region Info
         // info, returns info message
         if (command == (config.general.botPrefix + 'info')){
-            message.channel.send('```Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: NobleWolf42 and DK1\nIf you would like to assist with the bot, you can find us on Discord at https://discord.gg/tgJtK7f, and on GitHub at https://github.com/NobleWolf42/Queue-Bot/.```');
+
+            async function infoSend () {
+                message.channel.send(`\`\`\`Queue System Bot\nQueue system for Sea of Thieves Fleet/Alliance Servers\nDesigned and Bulit by: ${await(client.users.fetch('201665936049176576').then(user => user.tag))} and ${await(client.users.fetch('625253575957938176').then(user => user.tag))}\nIf you would like to assist with the bot, you can find us on Discord at https://discord.gg/tgJtK7f, and on GitHub at https://github.com/NobleWolf42/Queue-Bot/.\`\`\``);
+            }
+            infoSend();
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -288,6 +340,7 @@ client.on("message", message => {
             else {
                 message.channel.send("You do not have permission to use this command.");
             }
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
 
@@ -309,6 +362,7 @@ client.on("message", message => {
             else {
                 message.reply("You do not have permission to use this command.");
             }
+            message.delete({ timeout: 1500, reason: "cleanup"});
         };
         //#endregion
         //#endregion

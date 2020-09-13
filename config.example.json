@@ -3,6 +3,7 @@
         "token": "YOUR BOT TOKEN"
     },
     "general": {
+        "serverId": "YOUR SERVER ID",
         "botPrefix": "*",
         "adminRoles": [
             "Server Admin",
@@ -15,6 +16,7 @@
         "allowedChannels": [
             "Example-Chat-1",
             "General"
-        ]
+        ],
+        "queueVoiceChannel": "NAME OF YOU VOICE CHANNEL"
     }
 }
