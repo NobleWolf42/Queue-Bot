@@ -5,7 +5,18 @@ If you would like to help in the development of this bot, the discord is https:/
 
 Uses discord.js
 
-Install Commands for Dependancies:
-- npm install discord.js
+## Dependencies
 
-You will have to change some variables for your own use, copy the `config.example.json` to `config.json` and enter your settings.
+* Nodejs
+* Discord.js
+
+## How to run
+
+1. Clone this repo into a local directory using `git clone https://github.com/NobleWolf42/Queue-Bot`
+2. Copy file `config.example.json` to `config.json` and enter your settings. For any questions, please create an issue ticket or join through the invite link to our discord server above.
+3. Run `npm install` to install dependencies.
+4. To start the bot, run `node queue.js`.
+
+### FAQ
+
+"Coming soon"

@@ -153,6 +153,23 @@ function modCheck(userRolesArray, serverRolesArray) {
 
 //#endregion
 
+//#region handling queue functions
+
+//Removes given user from the queue
+//Returns true if it did, false if it did not
+function removeUser(userTag) {
+    var userIndex = queue.indexOf(userTag);
+
+    if(userIndex != -1) {
+        queue.splice(userIndex, 1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+//#endregion
+
 //#region Start  Bot
 
 //Logs the Bot info when bot starts
@@ -244,8 +261,7 @@ client.on("message", message => {
         // leave, removes the user who sent the message from the Queue list
         if (command == (config.general.botPrefix + 'leave')){
             
-            if (queue.indexOf(String(message.member.user.tag)) != -1) {
-                queue.splice(queue.indexOf(String(message.member.user.tag)), 1);
+            if (removeUser(message.member.user.tag)) {
                 message.reply("You have left the queue.");
             }
             else {
@@ -333,8 +349,11 @@ client.on("message", message => {
         if (command == (config.general.botPrefix + 'remove')){
             if (adminTF == true){
                 if(message.mentions.users.first() !== undefined) {
-                    queue.splice(queue.indexOf(String(message.mentions.users.first().tag)), 1);
-                    message.reply(`Removed ${message.mentions.users.first().tag} from Queue.`);
+                    if(removeUser(message.mentions.users.first().tag)) {
+                        message.reply(`Removed ${message.mentions.users.first().tag} from the queue.`);
+                    } else {
+                        message.reply(`This user is not in the queue.`);
+                    }
                 }
                 else {
                     message.reply("You did not @ a user.");
