@@ -1,0 +1,4 @@
+/node_modules
+config.json
+savedQueue.json
+package-lock.json
